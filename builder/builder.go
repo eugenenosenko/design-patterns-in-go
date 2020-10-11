@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	indentSize = 2
+	_indentSize = 2
 )
 
 type HTMLElement struct {
@@ -28,16 +28,11 @@ func NewHTMLBuilder(rootName string) *HTMLBuilder {
 	}
 }
 
-func (b *HTMLBuilder) String() string {
-	return b.root.String()
+func (b *HTMLBuilder) Build() *HTMLElement {
+	return &b.root
 }
 
-func (b *HTMLBuilder) AddChild(childName, childText string) {
-	e := HTMLElement{childName, childText, []HTMLElement{}}
-	b.root.elements = append(b.root.elements, e)
-}
-
-func (b *HTMLBuilder) AddChildFluent(childName, childText string) *HTMLBuilder {
+func (b *HTMLBuilder) AddChild(childName, childText string) *HTMLBuilder {
 	e := HTMLElement{childName, childText, []HTMLElement{}}
 	b.root.elements = append(b.root.elements, e)
 
@@ -50,11 +45,11 @@ func (e *HTMLElement) String() string {
 
 func (e *HTMLElement) string(indent int) string {
 	sb := strings.Builder{}
-	i := strings.Repeat(" ", indentSize*indent)
+	i := strings.Repeat(" ", _indentSize*indent)
 	sb.WriteString(fmt.Sprintf("%s<%s>\n", i, e.name))
 
 	if len(e.text) > 0 {
-		sb.WriteString(strings.Repeat(" ", indentSize*(indent+1)))
+		sb.WriteString(strings.Repeat(" ", _indentSize*(indent+1)))
 		sb.WriteString(e.text)
 		sb.WriteString("\n")
 	}
