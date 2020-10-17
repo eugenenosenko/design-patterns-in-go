@@ -1,6 +1,8 @@
 package adapter
 
 import (
+	"crypto/md5"
+	"encoding/json"
 	"strings"
 )
 
@@ -73,6 +75,8 @@ func DrawPoints(image RasterImage) string {
 	return b.String()
 }
 
+var pointCache = map[[16]byte][]Point{}
+
 // adapter
 type vectorToRasterAdapter struct {
 	points []Point
@@ -105,6 +109,40 @@ func (v *vectorToRasterAdapter) addLine(line Line) {
 			v.points = append(v.points, Point{x, top})
 		}
 	}
+}
+func hash(obj interface{}) [16]byte {
+	bytes, _ := json.Marshal(obj)
+	return md5.Sum(bytes)
+}
+
+// cached solution for adapter
+// data generated so caching mechanism will avoid unnecessary calculations
+func (v *vectorToRasterAdapter) addLineCached(line Line) {
+	h := hash(line)
+	if pts, ok := pointCache[h]; ok {
+		for _, pt := range pts {
+			v.points = append(v.points, pt)
+		}
+
+		return
+	}
+
+	left, right := minmax(line.X1, line.X2)
+	top, bottom := minmax(line.Y1, line.Y2)
+	dx := right - left
+	dy := line.Y2 - line.Y1
+
+	if dx == 0 {
+		for y := top; y <= bottom; y++ {
+			v.points = append(v.points, Point{left, y})
+		}
+	} else if dy == 0 {
+		for x := left; x <= right; x++ {
+			v.points = append(v.points, Point{x, top})
+		}
+	}
+
+	pointCache[h] = v.points
 }
 
 func VectorToRaster(vi *VectorImage) RasterImage {
