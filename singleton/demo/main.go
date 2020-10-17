@@ -1,8 +1,9 @@
 package main
 
 import (
-	"design-patterns-in-go/singleton"
 	"fmt"
+
+	"design-patterns-in-go/singleton"
 )
 
 func main() {
